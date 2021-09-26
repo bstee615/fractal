@@ -144,9 +144,9 @@ function drawMandelbrot(depth, stride, size) {
 
 var timeouts = [];
 function drawMandelbrotTimed(depth, stride, size) {
-    var i = 0;
+    var j = 0;
     function doit() {
-        for (var j = 0; j < canvas.height; j += stride) {
+        for (var i = 0; i < canvas.width; i += stride) {
             var p = Point.fromScreen(i, j);
             if (doesItDiverge(ZERO_POINT, p, depth)) {
                 fillCircleAtPoint(p, size, 'red');
@@ -155,15 +155,15 @@ function drawMandelbrotTimed(depth, stride, size) {
                 fillCircleAtPoint(p, size, 'green');
             }
         }
-        i += stride;
-        if (i >= canvas.width) {
+        j += stride;
+        if (j >= canvas.height) {
             for (var t of timeouts) {
                 clearInterval(t);
             }
             timeouts = [];
         }
     }
-    timeouts.push(setInterval(doit, 10));
+    timeouts.push(setInterval(doit, 1));
 }
 
 var stride = 25;
@@ -225,6 +225,7 @@ function draw() {
         ctx.fillText('A', mouseLocationScreen.x, mouseLocationScreen.y);
         ctx.fillText('C', CScreen.x, CScreen.y);
         
+        ctx.fillText('Press SPACE for detail', 525, 50);
         ctx.fillText(`${numLinks} links`, 350, 50);
         ctx.fillText(`interactive: ${interactiveMode}`, 25, 50);
 
