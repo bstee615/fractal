@@ -74,6 +74,7 @@ class Point
 
 const UNIT = 200;
 const UNIT_POINT = new Point(UNIT, UNIT);
+const ZERO_POINT = new Point(0, 0);
 
 var origin = new Point(canvas.width / 2, canvas.height / 2);
 
@@ -92,21 +93,43 @@ function lineToPoint(p) {
     ctx.lineTo(p.x, p.y);
 }
 
+function fillCircleAtPoint(p, radius, color) {
+    p = p.toScreen();
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, radius, 0, 2 * Math.PI);
+    var oldFillStyle = ctx.fillStyle;
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.fillStyle = oldFillStyle;
+}
+
 canvas.addEventListener('mousemove', e => {
     clearRect();
     var mouseLocation = Point.fromScreen(e.offsetX, e.offsetY);
     console.log(mouseLocation.x, mouseLocation.y);
 
+    var points = [mouseLocation];
+    for (var i = 0; i < 5; i++) {
+        mouseLocationPower = points[points.length-1].timesComplex(points[points.length-1]);
+        points.push(mouseLocationPower);
+    }
+    
     ctx.beginPath();
     var mouseLocationScreen = mouseLocation.toScreen();
     ctx.moveTo(mouseLocationScreen.x, mouseLocationScreen.y);
-    var mouseLocationPower = mouseLocation.copy();
-    for (var i = 0; i < 5; i++) {
-        mouseLocationPower = mouseLocationPower.timesComplex(mouseLocation);
-        lineToPoint(mouseLocationPower);
+    for (var p of points) {
+        lineToPoint(p);
     }
-    lineToPoint(new Point(0, 0));
+    lineToPoint(ZERO_POINT);
     ctx.stroke();
+
+    for (var p of points) {
+        fillCircleAtPoint(p, 5, 'red');
+    }
+
+    ctx.font = '48px serif';
+    ctx.fillText('A', mouseLocationScreen.x, mouseLocationScreen.y);
+    ctx.fillText('C', origin.x, origin.y);
 
     ctx.beginPath();
     ctx.arc(origin.x, origin.y, UNIT, 0, 2 * Math.PI);
