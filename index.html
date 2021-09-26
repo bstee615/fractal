@@ -107,6 +107,17 @@ var numLinks = 5;
 const MAX_NUM_LINKS = 50;
 var mouseLocation = null;
 
+function doesItDiverge(p) {
+    var nextPoint = p;
+    for (var i = 0; i < 100; i++) {
+        nextPoint = nextPoint.timesComplex(nextPoint).plus(C);
+        if (isNaN(nextPoint.x) || isNaN(nextPoint.y)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function draw() {
     clearRect();
 
@@ -131,8 +142,17 @@ function draw() {
     lineToPoint(mouseLocation);
     ctx.stroke();
 
+    var diverges = doesItDiverge(mouseLocation);
+    var color = null;
+    if (diverges) {
+        var color = 'red';
+    }
+    else {
+        var color = 'green';
+    }
+
     for (var i = points.length-1; i >= 0; i --) {
-        fillCircleAtPoint(points[i], 5, 'red');
+        fillCircleAtPoint(points[i], 5, color);
     }
 
     ctx.font = '48px serif';
