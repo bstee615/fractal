@@ -22,6 +22,15 @@ class Point
         this.y = y;
     }
 
+    static fromScreen(x, y) {
+        return new Point(x - origin.x, y - origin.y).div(UNIT_POINT);
+    }
+
+    toScreen() {
+        var t = this.times(UNIT_POINT);
+        return new Point(t.x + origin.x, t.y + origin.y);
+    }
+
     toOrigin() {
         var p = this.copy();
         copy.x += origin.x;
@@ -52,7 +61,14 @@ class Point
     times(p) {
         return new Point(this.x * p.x, this.y * p.y);
     }
+
+    div(p) {
+        return new Point(this.x / p.x, this.y / p.y);
+    }
 }
+
+const UNIT = 200;
+const UNIT_POINT = new Point(UNIT, UNIT);
 
 var origin = new Point(canvas.width / 2, canvas.height / 2);
 
@@ -66,20 +82,20 @@ function clearRect() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-const UNIT = 200;
-
 function lineToPoint(p) {
+    p = p.toScreen();
     ctx.lineTo(p.x, p.y);
 }
 
 canvas.addEventListener('mousemove', e => {
     clearRect();
-    var mouseLocation = new Point(e.offsetX, e.offsetY);
+    var mouseLocation = Point.fromScreen(e.offsetX, e.offsetY);
+    console.log(mouseLocation.x, mouseLocation.y);
 
     ctx.beginPath();
     ctx.moveTo(origin.x, origin.y);
     lineToPoint(mouseLocation);
-    lineToPoint(mouseLocation.plus(new Point(50, 50)));
+    lineToPoint(mouseLocation.times(mouseLocation));
     ctx.stroke();
 
     ctx.beginPath();
