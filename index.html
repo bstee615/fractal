@@ -103,13 +103,16 @@ function fillCircleAtPoint(p, radius, color) {
     ctx.fillStyle = oldFillStyle;
 }
 
+var numLinks = 5;
+const MAX_NUM_LINKS = 50;
+
 canvas.addEventListener('mousemove', e => {
     clearRect();
     var mouseLocation = Point.fromScreen(e.offsetX, e.offsetY);
-    console.log(mouseLocation.x, mouseLocation.y);
+    // console.log(mouseLocation.x, mouseLocation.y);
 
     var points = [mouseLocation];
-    for (var i = 0; i < 5; i++) {
+    for (var i = 0; i < numLinks; i++) {
         mouseLocationPower = points[points.length-1].timesComplex(points[points.length-1]);
         points.push(mouseLocationPower);
     }
@@ -134,5 +137,19 @@ canvas.addEventListener('mousemove', e => {
     ctx.beginPath();
     ctx.arc(origin.x, origin.y, UNIT, 0, 2 * Math.PI);
     ctx.stroke();
+});
+
+canvas.addEventListener("wheel", function (e) {
+    var variation = parseInt(e.deltaY);
+    if (variation < 0) {
+        if (numLinks < MAX_NUM_LINKS) {
+            numLinks ++;
+        }
+    }
+    else {
+        if (numLinks > 0) {
+            numLinks --;
+        }
+    }
 });
 </script>
