@@ -58,6 +58,11 @@ class Point
         return new Point(this.x - p.x, this.y - p.y);
     }
 
+    timesComplex(p) {
+        // (x + yi) (u + vi) = (xu - yv) + (xv + yu)i
+        return new Point((this.x * p.x - this.y * p.y), (this.x * p.y + this.y * p.x));
+    }
+
     times(p) {
         return new Point(this.x * p.x, this.y * p.y);
     }
@@ -93,9 +98,14 @@ canvas.addEventListener('mousemove', e => {
     console.log(mouseLocation.x, mouseLocation.y);
 
     ctx.beginPath();
-    ctx.moveTo(origin.x, origin.y);
-    lineToPoint(mouseLocation);
-    lineToPoint(mouseLocation.times(mouseLocation));
+    var mouseLocationScreen = mouseLocation.toScreen();
+    ctx.moveTo(mouseLocationScreen.x, mouseLocationScreen.y);
+    var mouseLocationPower = mouseLocation.copy();
+    for (var i = 0; i < 5; i++) {
+        mouseLocationPower = mouseLocationPower.timesComplex(mouseLocation);
+        lineToPoint(mouseLocationPower);
+    }
+    lineToPoint(new Point(0, 0));
     ctx.stroke();
 
     ctx.beginPath();
