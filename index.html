@@ -1,0 +1,81 @@
+<style>
+html, body {
+  width:  100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+</style>
+
+<canvas id="myCanvas" style="border: solid black 1px; padding: 0;">Your browser does not seem to support HTML5 canvas.</canvas>
+
+<script>
+var canvas = document.getElementById("myCanvas");
+canvas.width  = window.innerWidth - 20;
+canvas.height = window.innerHeight - 20;
+canvas.style.margin = "9px";
+
+class Point
+{
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    toOrigin() {
+        var p = this.copy();
+        copy.x += origin.x;
+        copy.y += origin.y;
+        return p;
+    }
+
+    toAbsolute() {
+        var p = this.copy();
+        copy.x -= origin.x;
+        copy.y -= origin.y;
+        return p;
+    }
+
+    copy() {
+        var p = Point();
+        p.x = this.x;
+        p.y = this.y;
+        return p;
+    }
+}
+
+var origin = new Point(canvas.width / 2, canvas.height / 2);
+
+function toOrigin(x, y) {
+    return originX + x, originY + y;
+}
+
+var ctx = canvas.getContext('2d');
+
+// ctx.fillRect(25, 25, 100, 100);
+// ctx.clearRect(45, 45, 60, 60);
+// ctx.strokeRect(50, 50, 50, 50);
+
+// ctx.beginPath();
+// ctx.moveTo(origin.x, origin.y);
+// ctx.lineTo(origin.x + 50, origin.y + 50);
+// ctx.stroke();
+
+function clearRect() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+const UNIT = 200;
+
+canvas.addEventListener('mousemove', e => {
+    clearRect();
+    var p = new Point(e.offsetX, e.offsetY);
+    ctx.beginPath();
+    ctx.moveTo(origin.x, origin.y);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(origin.x, origin.y, UNIT, 0, 2 * Math.PI);
+    ctx.stroke();
+});
+</script>
