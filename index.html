@@ -105,11 +105,14 @@ function fillCircleAtPoint(p, radius, color) {
 
 var numLinks = 5;
 const MAX_NUM_LINKS = 50;
+var mouseLocation = null;
 
-canvas.addEventListener('mousemove', e => {
+function draw() {
     clearRect();
-    var mouseLocation = Point.fromScreen(e.offsetX, e.offsetY);
-    // console.log(mouseLocation.x, mouseLocation.y);
+
+    if (mouseLocation == null) {
+        return;
+    }
 
     var points = [mouseLocation];
     for (var i = 0; i < numLinks; i++) {
@@ -133,10 +136,17 @@ canvas.addEventListener('mousemove', e => {
     ctx.font = '48px serif';
     ctx.fillText('A', mouseLocationScreen.x, mouseLocationScreen.y);
     ctx.fillText('C', origin.x, origin.y);
+    
+    ctx.fillText(`${numLinks} links`, 30, 50);
 
     ctx.beginPath();
     ctx.arc(origin.x, origin.y, UNIT, 0, 2 * Math.PI);
     ctx.stroke();
+}
+
+canvas.addEventListener('mousemove', e => {
+    mouseLocation = Point.fromScreen(e.offsetX, e.offsetY);
+    draw();
 });
 
 canvas.addEventListener("wheel", function (e) {
@@ -151,5 +161,6 @@ canvas.addEventListener("wheel", function (e) {
             numLinks --;
         }
     }
+    draw();
 });
 </script>
