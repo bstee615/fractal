@@ -142,60 +142,96 @@ function drawMandelbrot(depth, stride, size) {
     }
 }
 
+var timeouts = [];
+function drawMandelbrotTimed(depth, stride, size) {
+    var i = 0;
+    function doit() {
+        for (var j = 0; j < canvas.height; j += stride) {
+            var p = Point.fromScreen(i, j);
+            if (doesItDiverge(ZERO_POINT, p, depth)) {
+                fillCircleAtPoint(p, size, 'red');
+            }
+            else {
+                fillCircleAtPoint(p, size, 'green');
+            }
+        }
+        i += stride;
+        if (i >= canvas.width) {
+            for (var t of timeouts) {
+                clearInterval(t);
+            }
+            timeouts = [];
+        }
+    }
+    timeouts.push(setInterval(doit, 10));
+}
+
 var stride = 25;
 var size = 10;
+var interactiveMode = true;
+var drew = false;
 
 function draw() {
-    clearRect();
-
-    if (mouseLocation == null) {
-        return;
-    }
-
-    drawMandelbrot(numLinks, stride, size);
-
-    var points = [mouseLocation];
-    for (var i = 0; i < numLinks; i++) {
-        mouseLocationPower = points[points.length-1].timesComplex(points[points.length-1]).plus(C);
-        points.push(mouseLocationPower);
-    }
-    
-    ctx.beginPath();
-    var mouseLocationScreen = mouseLocation.toScreen();
-    CScreen = C.toScreen();
-    ctx.moveTo(CScreen.x, CScreen.y);
-    for (var i = points.length-1; i >= 0; i --) {
-        var p = points[i];
-        lineToPoint(p);
-    }
-    lineToPoint(mouseLocation);
-    ctx.stroke();
-
-    var diverges = doesItDiverge(mouseLocation, C, numLinks);
-    var color = null;
-    if (diverges) {
-        var color = 'red';
+    if (!interactiveMode) {
+        if (!drew) {
+            clearRect();
+            drawMandelbrotTimed(250, 1, 1);
+        }
+        drew = true;
     }
     else {
-        var color = 'green';
+        clearRect();
+
+        if (mouseLocation == null) {
+            return;
+        }
+
+        drawMandelbrot(numLinks, stride, size);
+
+        var points = [mouseLocation];
+        for (var i = 0; i < numLinks; i++) {
+            mouseLocationPower = points[points.length-1].timesComplex(points[points.length-1]).plus(C);
+            points.push(mouseLocationPower);
+        }
+        
+        ctx.beginPath();
+        var mouseLocationScreen = mouseLocation.toScreen();
+        CScreen = C.toScreen();
+        ctx.moveTo(CScreen.x, CScreen.y);
+        for (var i = points.length-1; i >= 0; i --) {
+            var p = points[i];
+            lineToPoint(p);
+        }
+        lineToPoint(mouseLocation);
+        ctx.stroke();
+
+        var diverges = doesItDiverge(mouseLocation, C, numLinks);
+        var color = null;
+        if (diverges) {
+            var color = 'red';
+        }
+        else {
+            var color = 'green';
+        }
+
+        fillCircleAtPoint(C, 5, color);
+        strokeCircleAtPoint(C, 5, 'black');
+        for (var i = points.length-1; i >= 0; i --) {
+            fillCircleAtPoint(points[i], 5, color);
+            strokeCircleAtPoint(points[i], 5, 'black');
+        }
+
+        ctx.font = '48px serif';
+        ctx.fillText('A', mouseLocationScreen.x, mouseLocationScreen.y);
+        ctx.fillText('C', CScreen.x, CScreen.y);
+        
+        ctx.fillText(`${numLinks} links`, 350, 50);
+        ctx.fillText(`interactive: ${interactiveMode}`, 25, 50);
+
+        ctx.beginPath();
+        ctx.arc(origin.x, origin.y, UNIT, 0, 2 * Math.PI);
+        ctx.stroke();
     }
-
-    fillCircleAtPoint(C, 5, color);
-    strokeCircleAtPoint(C, 5, 'black');
-    for (var i = points.length-1; i >= 0; i --) {
-        fillCircleAtPoint(points[i], 5, color);
-        strokeCircleAtPoint(points[i], 5, 'black');
-    }
-
-    ctx.font = '48px serif';
-    ctx.fillText('A', mouseLocationScreen.x, mouseLocationScreen.y);
-    ctx.fillText('C', CScreen.x, CScreen.y);
-    
-    ctx.fillText(`${numLinks} links`, 30, 50);
-
-    ctx.beginPath();
-    ctx.arc(origin.x, origin.y, UNIT, 0, 2 * Math.PI);
-    ctx.stroke();
 }
 
 canvas.addEventListener('mousemove', e => {
@@ -230,6 +266,14 @@ window.addEventListener('keydown', function(e) {
     }
     else if (e.keyCode == '39') {
         C.x += 1/UNIT*stride;
+    }
+    else if (e.keyCode == '32') {
+        interactiveMode = !interactiveMode;
+        for (var t of timeouts) {
+            clearInterval(t);
+        }
+        timeouts = [];
+        drew = false;
     }
     draw();
 })
