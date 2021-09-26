@@ -117,9 +117,9 @@ var numLinks = 25;
 const MAX_NUM_LINKS = 50;
 var mouseLocation = null;
 
-function doesItDiverge(p) {
+function doesItDiverge(p, C, depth) {
     var nextPoint = p;
-    for (var i = 0; i < 100; i++) {
+    for (var i = 0; i < depth; i++) {
         nextPoint = nextPoint.timesComplex(nextPoint).plus(C);
         if (isNaN(nextPoint.x) || isNaN(nextPoint.y)) {
             return true;
@@ -128,12 +128,31 @@ function doesItDiverge(p) {
     return false;
 }
 
+function drawMandelbrot(depth, stride, size) {
+    for (var i = 0; i < canvas.width; i += stride) {
+        for (var j = 0; j < canvas.height; j += stride) {
+            var p = Point.fromScreen(i, j);
+            if (doesItDiverge(ZERO_POINT, p, depth)) {
+                fillCircleAtPoint(p, size, 'red');
+            }
+            else {
+                fillCircleAtPoint(p, size, 'green');
+            }
+        }
+    }
+}
+
+var stride = 25;
+var size = 10;
+
 function draw() {
     clearRect();
 
     if (mouseLocation == null) {
         return;
     }
+
+    drawMandelbrot(numLinks, stride, size);
 
     var points = [mouseLocation];
     for (var i = 0; i < numLinks; i++) {
@@ -152,7 +171,7 @@ function draw() {
     lineToPoint(mouseLocation);
     ctx.stroke();
 
-    var diverges = doesItDiverge(mouseLocation);
+    var diverges = doesItDiverge(mouseLocation, C, numLinks);
     var color = null;
     if (diverges) {
         var color = 'red';
@@ -201,16 +220,16 @@ canvas.addEventListener("wheel", function (e) {
 
 window.addEventListener('keydown', function(e) {
     if (e.keyCode == '38') {
-        C.y -= 0.05;
+        C.y -= 1/UNIT*stride;
     }
     else if (e.keyCode == '40') {
-        C.y += 0.05;
+        C.y += 1/UNIT*stride;
     }
     else if (e.keyCode == '37') {
-        C.x -= 0.05;
+        C.x -= 1/UNIT*stride;
     }
     else if (e.keyCode == '39') {
-        C.x += 0.05;
+        C.x += 1/UNIT*stride;
     }
     draw();
 })
