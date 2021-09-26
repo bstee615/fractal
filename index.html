@@ -50,7 +50,6 @@ class Point
     }
 
     plus(p) {
-        console.log(this.x, this.y, p.x, p.y);
         return new Point(this.x + p.x, this.y + p.y);
     }
 
@@ -77,6 +76,7 @@ const UNIT_POINT = new Point(UNIT, UNIT);
 const ZERO_POINT = new Point(0, 0);
 
 var origin = new Point(canvas.width / 2, canvas.height / 2);
+var C = ZERO_POINT.copy();
 
 function toOrigin(x, y) {
     return originX + x, originY + y;
@@ -116,26 +116,28 @@ function draw() {
 
     var points = [mouseLocation];
     for (var i = 0; i < numLinks; i++) {
-        mouseLocationPower = points[points.length-1].timesComplex(points[points.length-1]);
+        mouseLocationPower = points[points.length-1].timesComplex(points[points.length-1]).plus(C);
         points.push(mouseLocationPower);
     }
     
     ctx.beginPath();
     var mouseLocationScreen = mouseLocation.toScreen();
-    ctx.moveTo(mouseLocationScreen.x, mouseLocationScreen.y);
-    for (var p of points) {
+    CScreen = C.toScreen();
+    ctx.moveTo(CScreen.x, CScreen.y);
+    for (var i = points.length-1; i >= 0; i --) {
+        var p = points[i];
         lineToPoint(p);
     }
-    lineToPoint(ZERO_POINT);
+    lineToPoint(mouseLocation);
     ctx.stroke();
 
-    for (var p of points) {
-        fillCircleAtPoint(p, 5, 'red');
+    for (var i = points.length-1; i >= 0; i --) {
+        fillCircleAtPoint(points[i], 5, 'red');
     }
 
     ctx.font = '48px serif';
     ctx.fillText('A', mouseLocationScreen.x, mouseLocationScreen.y);
-    ctx.fillText('C', origin.x, origin.y);
+    ctx.fillText('C', CScreen.x, CScreen.y);
     
     ctx.fillText(`${numLinks} links`, 30, 50);
 
@@ -163,4 +165,20 @@ canvas.addEventListener("wheel", function (e) {
     }
     draw();
 });
+
+window.addEventListener('keydown', function(e) {
+    if (e.keyCode == '38') {
+        C.y -= 0.05;
+    }
+    else if (e.keyCode == '40') {
+        C.y += 0.05;
+    }
+    else if (e.keyCode == '37') {
+        C.x -= 0.05;
+    }
+    else if (e.keyCode == '39') {
+        C.x += 0.05;
+    }
+    draw();
+})
 </script>
