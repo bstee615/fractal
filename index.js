@@ -1,0 +1,265 @@
+class Canvas {
+    constructor() {
+    }
+
+    origin() {
+        return new Point(canvas.width / 2, canvas.height / 2);
+    }
+}
+
+var canvas = document.getElementById("myCanvas");
+canvas.width  = window.innerWidth - 20;
+canvas.height = window.innerHeight - 20;
+canvas.style.margin = "9px";
+var ctx = canvas.getContext('2d');
+var originX = canvas.width / 2;
+var originY = canvas.height / 2;
+
+function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+class ScreenPoint {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    toPoint() {
+        return new Point((this.x - originX) / UNIT, (this.y - originY) / UNIT);
+    }
+
+    lineToPoint() {
+        ctx.lineTo(this.x, this.y);
+    }
+
+    isInBounds() {
+        return (this.x >= 0 && this.x < canvas.width && this.y >= 0 && this.y < canvas.height);
+    }
+    
+    fillCircleAtPoint(radius, color) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, radius, 0, 2 * Math.PI);
+        var oldFillStyle = ctx.fillStyle;
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.fillStyle = oldFillStyle;
+    }
+    
+    strokeCircleAtPoint(radius, color) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, radius, 0, 2 * Math.PI);
+        var oldStrokeStyle = ctx.strokeStyle;
+        ctx.strokeStyle = color;
+        ctx.stroke();
+        ctx.strokeStyle = oldStrokeStyle;
+    }
+}
+
+class Point
+{
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    toScreen() {
+        return new ScreenPoint((this.x * UNIT) + originX, (this.y * UNIT) + originY);
+    }
+
+    copy() {
+        return new Point(this.x, this.y);
+    }
+
+    plus(p) {
+        return new Point(this.x + p.x, this.y + p.y);
+    }
+
+    minus(p) {
+        return new Point(this.x - p.x, this.y - p.y);
+    }
+
+    timesComplex(p) {
+        // (x + yi) (u + vi) = (xu - yv) + (xv + yu)i
+        return new Point((this.x * p.x - this.y * p.y), (this.x * p.y + this.y * p.x));
+    }
+}
+
+var UNIT = 200;
+var stride = 25;
+var size = 10;
+var interactiveMode = true;
+var drew = false;
+
+var numLinks = 25;
+const MAX_NUM_LINKS = 50;
+var mouseLocation = null;
+
+var origin = new Point(0, 0);
+
+function doesItDiverge(point, origin, depth) {
+    var nextPoint = point;
+    for (var i = 0; i < depth; i++) {
+        nextPoint = nextPoint.timesComplex(nextPoint).plus(origin);
+        if (isNaN(nextPoint.x) || isNaN(nextPoint.y)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function drawMandelbrot(depth, stride, size) {
+    for (var i = 0; i < canvas.width; i += stride) {
+        for (var j = 0; j < canvas.height; j += stride) {
+            var p = new ScreenPoint(i, j);
+            if (doesItDiverge(origin, p.toPoint(), depth)) {
+                p.fillCircleAtPoint(size, 'red');
+            }
+            else {
+                p.fillCircleAtPoint(size, 'green');
+            }
+        }
+    }
+}
+
+var timeouts = [];
+function drawMandelbrotTimed(depth, stride, size) {
+    var j = 0;
+    function doit() {
+        for (var i = 0; i < canvas.width; i += stride) {
+            var p = new ScreenPoint(i, j);
+            if (doesItDiverge(origin, p.toPoint(), depth)) {
+                p.fillCircleAtPoint(size, 'red');
+            }
+            else {
+                p.fillCircleAtPoint(size, 'green');
+            }
+        }
+        j += stride;
+        if (j >= canvas.height) {
+            for (var t of timeouts) {
+                clearInterval(t);
+            }
+            timeouts = [];
+        }
+    }
+    timeouts.push(setInterval(doit, 1));
+}
+
+function draw() {
+    if (!interactiveMode) {
+        if (!drew) {
+            clearCanvas();
+            drawMandelbrotTimed(250, 1, 1);
+        }
+        drew = true;
+    }
+    else {
+        clearCanvas();
+
+        if (mouseLocation == null) {
+            return;
+        }
+
+        // drawMandelbrot(numLinks, stride, size);
+
+        var points = [mouseLocation];
+        for (var i = 0; i < numLinks; i++) {
+            mouseLocationPower = points[points.length-1].timesComplex(points[points.length-1]).plus(origin);
+            if (isNaN(mouseLocationPower.x) || isNaN(mouseLocationPower.y)) {
+                break;
+            }
+            points.push(mouseLocationPower);
+        }
+        points.push(origin);
+        points = points.map(p => p.toScreen());
+        
+        var originScreen = origin.toScreen();
+        var mouseLocationScreen = mouseLocation.toScreen();
+        for (var i = 0; i < points.length-1; i ++) {
+            ctx.beginPath();
+            var p = points[i];
+            var q = points[i+1];
+            // console.log(i, p, q, p.isInBounds(), q.isInBounds());
+            if (p.isInBounds() && q.isInBounds()) {
+                ctx.moveTo(p.x, p.y);
+                q.lineToPoint();
+                ctx.stroke();
+            }
+        }
+
+        var diverges = doesItDiverge(mouseLocation, origin, 100);
+        var color = null;
+        if (diverges) {
+            var color = 'red';
+        }
+        else {
+            var color = 'green';
+        }
+
+        originScreen.fillCircleAtPoint(5, color);
+        originScreen.strokeCircleAtPoint(5, 'black');
+        for (var i = points.length-1; i >= 0; i --) {
+            points[i].fillCircleAtPoint(5, color);
+            points[i].strokeCircleAtPoint(5, 'black');
+        }
+
+        ctx.font = '48px serif';
+        ctx.fillText('A', mouseLocationScreen.x, mouseLocationScreen.y);
+        ctx.fillText('origin', originScreen.x, originScreen.y);
+        
+        ctx.fillText('Press SPACE for detail', 525, 50);
+        ctx.fillText(`${numLinks} links`, 350, 50);
+        ctx.fillText(`interactive: ${interactiveMode}`, 25, 50);
+
+        ctx.beginPath();
+        originScreen.strokeCircleAtPoint(UNIT, 'black');
+        ctx.stroke();
+    }
+}
+
+canvas.addEventListener('mousemove', e => {
+    mouseLocation = new ScreenPoint(e.offsetX, e.offsetY).toPoint();
+    // draw();
+});
+
+setInterval(draw, 1000/60);
+
+canvas.addEventListener("wheel", function (e) {
+    var variation = parseInt(e.deltaY);
+    if (variation < 0) {
+        if (numLinks < MAX_NUM_LINKS) {
+            numLinks ++;
+        }
+    }
+    else {
+        if (numLinks > 0) {
+            numLinks --;
+        }
+    }
+    draw();
+});
+
+window.addEventListener('keydown', function(e) {
+    if (e.keyCode == '38') {
+        origin.y -= 1/UNIT*stride;
+    }
+    else if (e.keyCode == '40') {
+        origin.y += 1/UNIT*stride;
+    }
+    else if (e.keyCode == '37') {
+        origin.x -= 1/UNIT*stride;
+    }
+    else if (e.keyCode == '39') {
+        origin.x += 1/UNIT*stride;
+    }
+    else if (e.keyCode == '32') {
+        interactiveMode = !interactiveMode;
+        for (var t of timeouts) {
+            clearInterval(t);
+        }
+        timeouts = [];
+        drew = false;
+    }
+    draw();
+})
