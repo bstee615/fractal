@@ -237,9 +237,12 @@ function draw() {
     }
 }
 
-canvas.addEventListener('mousemove', e => {
-    mouseLocation = new ScreenPoint(e.offsetX, e.offsetY).toPoint();
-    // draw();
+window.addEventListener('mousemove', e => {
+    var canvasRect = canvas.getBoundingClientRect();
+    var offX = e.pageX + canvasRect.left;
+    var offY = e.pageY + canvasRect.top;
+    console.log(e.pageX, e.pageY, canvasRect.left, canvasRect.top);
+    mouseLocation = new ScreenPoint(offX, offY).toPoint();
 });
 
 setInterval(draw, 1000/60);
@@ -266,16 +269,16 @@ function switchInteractive() {
     instructionsBlock.textContent = interactiveMode ? "Scroll up/down to add/remove iterations, use arrows to move origin" : "Click the button to switch back to interactive mode";
     contentBlock.textContent = getText();
 }
-window.addEventListener('click', function(ev) {
-    var rect = switchBtn.getBoundingClientRect();
-    if (ev.offsetX > rect.left && ev.offsetX < rect.right)
-    {
-        if (ev.offsetY > rect.top && ev.offsetY < rect.bottom)
-        {
-            switchInteractive();
-        }
-    }
-});
+// window.addEventListener('click', function(ev) {
+    // var rect = switchBtn.getBoundingClientRect();
+    // if (ev.offsetX > rect.left && ev.offsetX < rect.right)
+    // {
+    //     if (ev.offsetY > rect.top && ev.offsetY < rect.bottom)
+    //     {
+    //         switchInteractive();
+    //     }
+    // }
+// });
 
 var left = false;
 var right = false;
