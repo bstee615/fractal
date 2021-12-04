@@ -111,7 +111,7 @@ var mouseLocation = null;
 function getText() {
     if (interactiveMode)
     {
-        return `Interactive: true, ${numLinks} links`;
+        return `Interactive: true, ${numLinks} iterations`;
     }
     else
     {
@@ -122,7 +122,7 @@ function getText() {
 var origin = new Point(0, 0);
 var trueOrigin = new Point(0, 0);
 switchBtn.textContent = `Switch to ${interactiveMode ? "hi-res render" : "interactive"}`;
-instructionsBlock.textContent = interactiveMode ? "Scroll up/down to add/remove links, use arrows to move origin" : "Click the button to switch back to interactive mode";
+instructionsBlock.textContent = interactiveMode ? "Scroll up/down to add/remove iterations, use arrows to move origin" : "Click the button to switch back to interactive mode";
 contentBlock.textContent = getText();
 
 function doesItDiverge(point, origin, depth) {
@@ -219,8 +219,8 @@ function draw() {
         }
 
         ctx.font = '48px serif';
-        ctx.fillText('A', mouseLocationScreen.x, mouseLocationScreen.y);
-        ctx.fillText('origin', originScreen.x, originScreen.y);
+        ctx.fillText('z', mouseLocationScreen.x, mouseLocationScreen.y);
+        ctx.fillText('c', originScreen.x, originScreen.y);
 
         ctx.beginPath();
         trueOrigin.minus(new Point(-1.5, 0)).toScreen().moveTo();
@@ -263,7 +263,7 @@ function switchInteractive() {
     interactiveMode = !interactiveMode;
     drew = false;
     switchBtn.textContent = `Switch to ${interactiveMode ? "hi-res render" : "interactive"}`;
-    instructionsBlock.textContent = interactiveMode ? "Scroll up/down to add/remove links, use arrows to move origin" : "Click the button to switch back to interactive mode";
+    instructionsBlock.textContent = interactiveMode ? "Scroll up/down to add/remove iterations, use arrows to move origin" : "Click the button to switch back to interactive mode";
     contentBlock.textContent = getText();
 }
 

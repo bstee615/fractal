@@ -8,13 +8,24 @@ html, body {
 </style>
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-<div class="card" style='position: absolute; left: 0; top: 0; margin: 10px'>
+<div class="col-sm-3" style='position: absolute; left: 0; top: 0; margin: 10px; padding: 0; opacity: 0.8; pointer-events: none;'>
+<div class="card">
   <div class="card-body">
     <h5 class="card-title">Menu</h5>
+    <div class="card-text">
+      This interactive diagram shows a <a href="https://en.wikipedia.org/wiki/Mandelbrot_set">Mandelbrot fractal</a>.
+      Given a simple function <i>f<sub>c</sub>(z) = z<sup>2</sup> + c</i>, the Mandelbrot set is the set of numbers which does not diverge to infinity when iterated a large number of times.
+      The interactive mode shows a few iterations (5 by default) of <i>f<sub>c</sub>(z)</i>.
+      When <i>f<sub>c</sub>(z)</i> diverges on a large number of iterations, the nodes will be red; when it doesn't diverge, the nodes will be green.
+      When <i>c</i> is at the origin, if you move outside the unit circle, the figure will quickly diverge.
+      Try playing around by moving <i>z</i> and the <i>c</i> with the mouse and arrow keys.
+    </div>
+    <hr>
     <div class="card-text" id="contentBlock"></div>
     <button class="card-text" id="switchBtn" onclick="switchInteractive()"></button>
     <div class="card-text" id="instructionsBlock">Use scrollwheel to adjust the number of links</div>
   </div>
+</div>
 </div>
 
 <canvas id="myCanvas">Your browser does not seem to support HTML5 canvas.</canvas>
