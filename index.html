@@ -6,9 +6,17 @@ html, body {
   overflow: hidden;
 }
 </style>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-<canvas id="myCanvas" style="border: solid black 1px; padding: 0;">Your browser does not seem to support HTML5 canvas.</canvas>
+<div class="card" style='position: absolute; left: 0; top: 0; margin: 10px'>
+  <div class="card-body">
+    <h5 class="card-title">Menu</h5>
+    <div class="card-text" id="contentBlock"></div>
+    <button class="card-text" id="switchBtn" onclick="switchInteractive()"></button>
+    <div class="card-text" id="instructionsBlock">Use scrollwheel to adjust the number of links</div>
+  </div>
+</div>
 
-<button style="position: absolute; left: 25px; top: 25px; z-index: 1;" onclick="switchInteractive()">Switch</button>
+<canvas id="myCanvas">Your browser does not seem to support HTML5 canvas.</canvas>
 
 <script src="index.js"></script>

@@ -8,12 +8,17 @@ class Canvas {
 }
 
 var canvas = document.getElementById("myCanvas");
-canvas.width  = window.innerWidth - 20;
-canvas.height = window.innerHeight - 20;
-canvas.style.margin = "9px";
-var ctx = canvas.getContext('2d');
+canvas.width  = window.innerWidth - canvas.offsetLeft;
+canvas.height = window.innerHeight - canvas.offsetTop;
 var originX = canvas.width / 2;
 var originY = canvas.height / 2;
+window.addEventListener('resize', function() {
+    canvas.width  = window.innerWidth - canvas.offsetLeft;
+    canvas.height = window.innerHeight - canvas.offsetTop;
+    originX = canvas.width / 2;
+    originY = canvas.height / 2;
+});
+var ctx = canvas.getContext('2d');
 
 function clearCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -89,6 +94,10 @@ class Point
     }
 }
 
+var contentBlock = document.getElementById("contentBlock");
+var switchBtn = document.getElementById("switchBtn");
+var instructionsBlock = document.getElementById("instructionsBlock");
+
 var UNIT = 200;
 var stride = 25;
 var size = 10;
@@ -99,8 +108,22 @@ var numLinks = 5;
 const MAX_NUM_LINKS = 50;
 var mouseLocation = null;
 
+function getText() {
+    if (interactiveMode)
+    {
+        return `Interactive: true, ${numLinks} links`;
+    }
+    else
+    {
+        return `Interactive: false`;
+    }
+}
+
 var origin = new Point(0, 0);
 var trueOrigin = new Point(0, 0);
+switchBtn.textContent = `Switch to ${interactiveMode ? "hi-res render" : "interactive"}`;
+instructionsBlock.textContent = interactiveMode ? "Scroll up/down to add/remove links, use arrows to move origin" : "Click the button to switch back to interactive mode";
+contentBlock.textContent = getText();
 
 function doesItDiverge(point, origin, depth) {
     var nextPoint = point;
@@ -132,10 +155,7 @@ function drawMandelbrotTimed(depth, stride, size) {
     for (var i = 0; i < canvas.width; i += stride) {
         for (var j = 0; j < canvas.height; j += stride) {
             var p = new ScreenPoint(i, j);
-            if (doesItDiverge(origin, p.toPoint(), depth)) {
-                p.fillCircleAtPoint(size, 'red');
-            }
-            else {
+            if (!doesItDiverge(origin, p.toPoint(), depth)) {
                 p.fillCircleAtPoint(size, 'green');
             }
         }
@@ -201,10 +221,6 @@ function draw() {
         ctx.font = '48px serif';
         ctx.fillText('A', mouseLocationScreen.x, mouseLocationScreen.y);
         ctx.fillText('origin', originScreen.x, originScreen.y);
-        
-        ctx.fillText('Press SPACE for detail', 525, 50);
-        ctx.fillText(`${numLinks} links`, 350, 50);
-        ctx.fillText(`interactive: ${interactiveMode}`, 25, 50);
 
         ctx.beginPath();
         trueOrigin.minus(new Point(-1.5, 0)).toScreen().moveTo();
@@ -240,11 +256,15 @@ canvas.addEventListener("wheel", function (e) {
             numLinks --;
         }
     }
+    contentBlock.textContent = getText();
 });
 
 function switchInteractive() {
     interactiveMode = !interactiveMode;
     drew = false;
+    switchBtn.textContent = `Switch to ${interactiveMode ? "hi-res render" : "interactive"}`;
+    instructionsBlock.textContent = interactiveMode ? "Scroll up/down to add/remove links, use arrows to move origin" : "Click the button to switch back to interactive mode";
+    contentBlock.textContent = getText();
 }
 
 var left = false;
