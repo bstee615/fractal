@@ -266,6 +266,16 @@ function switchInteractive() {
     instructionsBlock.textContent = interactiveMode ? "Scroll up/down to add/remove iterations, use arrows to move origin" : "Click the button to switch back to interactive mode";
     contentBlock.textContent = getText();
 }
+window.addEventListener('click', function(ev) {
+    var rect = switchBtn.getBoundingClientRect();
+    if (ev.offsetX > rect.left && ev.offsetX < rect.right)
+    {
+        if (ev.offsetY > rect.top && ev.offsetY < rect.bottom)
+        {
+            switchInteractive();
+        }
+    }
+});
 
 var left = false;
 var right = false;
