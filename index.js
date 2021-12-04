@@ -212,10 +212,10 @@ function draw() {
         }
 
         originScreen.fillCircleAtPoint(5, color);
-        originScreen.strokeCircleAtPoint(5, 'black');
+        originScreen.strokeCircleAtPoint(5, 'gray');
         for (var i = points.length-1; i >= 0; i --) {
             points[i].fillCircleAtPoint(5, color);
-            points[i].strokeCircleAtPoint(5, 'black');
+            points[i].strokeCircleAtPoint(5, 'gray');
         }
 
         ctx.font = '48px serif';
@@ -232,7 +232,7 @@ function draw() {
         ctx.stroke();
         
         ctx.beginPath();
-        trueOrigin.toScreen().strokeCircleAtPoint(UNIT, 'black');
+        trueOrigin.toScreen().strokeCircleAtPoint(UNIT, 'gray');
         ctx.stroke();
     }
 }
