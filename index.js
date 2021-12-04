@@ -241,7 +241,6 @@ window.addEventListener('mousemove', e => {
     var canvasRect = canvas.getBoundingClientRect();
     var offX = e.pageX + canvasRect.left;
     var offY = e.pageY + canvasRect.top;
-    console.log(e.pageX, e.pageY, canvasRect.left, canvasRect.top);
     mouseLocation = new ScreenPoint(offX, offY).toPoint();
 });
 
