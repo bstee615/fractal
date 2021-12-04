@@ -33,6 +33,10 @@ class ScreenPoint {
         ctx.lineTo(this.x, this.y);
     }
 
+    moveTo() {
+        ctx.moveTo(this.x, this.y);
+    }
+
     isInBounds() {
         return (this.x >= 0 && this.x < canvas.width && this.y >= 0 && this.y < canvas.height);
     }
@@ -91,11 +95,12 @@ var size = 10;
 var interactiveMode = true;
 var drew = false;
 
-var numLinks = 25;
+var numLinks = 5;
 const MAX_NUM_LINKS = 50;
 var mouseLocation = null;
 
 var origin = new Point(0, 0);
+var trueOrigin = new Point(0, 0);
 
 function doesItDiverge(point, origin, depth) {
     var nextPoint = point;
@@ -122,11 +127,10 @@ function drawMandelbrot(depth, stride, size) {
     }
 }
 
-var timeouts = [];
 function drawMandelbrotTimed(depth, stride, size) {
-    var j = 0;
-    function doit() {
-        for (var i = 0; i < canvas.width; i += stride) {
+    drew = true;
+    for (var i = 0; i < canvas.width; i += stride) {
+        for (var j = 0; j < canvas.height; j += stride) {
             var p = new ScreenPoint(i, j);
             if (doesItDiverge(origin, p.toPoint(), depth)) {
                 p.fillCircleAtPoint(size, 'red');
@@ -135,15 +139,7 @@ function drawMandelbrotTimed(depth, stride, size) {
                 p.fillCircleAtPoint(size, 'green');
             }
         }
-        j += stride;
-        if (j >= canvas.height) {
-            for (var t of timeouts) {
-                clearInterval(t);
-            }
-            timeouts = [];
-        }
     }
-    timeouts.push(setInterval(doit, 1));
 }
 
 function draw() {
@@ -152,7 +148,6 @@ function draw() {
             clearCanvas();
             drawMandelbrotTimed(250, 1, 1);
         }
-        drew = true;
     }
     else {
         clearCanvas();
@@ -180,15 +175,14 @@ function draw() {
             ctx.beginPath();
             var p = points[i];
             var q = points[i+1];
-            // console.log(i, p, q, p.isInBounds(), q.isInBounds());
-            if (p.isInBounds() && q.isInBounds()) {
+            if (p.isInBounds() || q.isInBounds()) {
                 ctx.moveTo(p.x, p.y);
                 q.lineToPoint();
                 ctx.stroke();
             }
         }
 
-        var diverges = doesItDiverge(mouseLocation, origin, 100);
+        var diverges = doesItDiverge(mouseLocation, origin, 50);
         var color = null;
         if (diverges) {
             var color = 'red';
@@ -213,7 +207,16 @@ function draw() {
         ctx.fillText(`interactive: ${interactiveMode}`, 25, 50);
 
         ctx.beginPath();
-        originScreen.strokeCircleAtPoint(UNIT, 'black');
+        trueOrigin.minus(new Point(-1.5, 0)).toScreen().moveTo();
+        trueOrigin.minus(new Point(1.5, 0)).toScreen().lineToPoint();
+        ctx.stroke();
+        ctx.beginPath();
+        trueOrigin.minus(new Point(0, -1.5)).toScreen().moveTo();
+        trueOrigin.minus(new Point(0, 1.5)).toScreen().lineToPoint();
+        ctx.stroke();
+        
+        ctx.beginPath();
+        trueOrigin.toScreen().strokeCircleAtPoint(UNIT, 'black');
         ctx.stroke();
     }
 }
@@ -237,29 +240,57 @@ canvas.addEventListener("wheel", function (e) {
             numLinks --;
         }
     }
-    draw();
 });
 
-window.addEventListener('keydown', function(e) {
-    if (e.keyCode == '38') {
-        origin.y -= 1/UNIT*stride;
+function switchInteractive() {
+    interactiveMode = !interactiveMode;
+    drew = false;
+}
+
+var left = false;
+var right = false;
+var up = false;
+var down = false;
+function updatePosition() {
+    if (left) {
+        origin.x -= 0.01;
     }
-    else if (e.keyCode == '40') {
-        origin.y += 1/UNIT*stride;
+    if (right) {
+        origin.x += 0.01;
     }
-    else if (e.keyCode == '37') {
-        origin.x -= 1/UNIT*stride;
+    if (up) {
+        origin.y -= 0.01;
     }
-    else if (e.keyCode == '39') {
-        origin.x += 1/UNIT*stride;
+    if (down) {
+        origin.y += 0.01;
     }
-    else if (e.keyCode == '32') {
-        interactiveMode = !interactiveMode;
-        for (var t of timeouts) {
-            clearInterval(t);
-        }
-        timeouts = [];
-        drew = false;
+}
+window.addEventListener('keyup', function(e) {
+    if (e.key == 'ArrowRight') {
+        right = false;
     }
-    draw();
+    else if (e.key == 'ArrowLeft') {
+        left = false;
+    }
+    else if (e.key == 'ArrowUp') {
+        up = false;
+    }
+    else if (e.key == 'ArrowDown') {
+        down = false;
+    }
 })
+window.addEventListener('keydown', function(e) {
+    if (e.key == 'ArrowRight') {
+        right = true;
+    }
+    else if (e.key == 'ArrowLeft') {
+        left = true;
+    }
+    else if (e.key == 'ArrowUp') {
+        up = true;
+    }
+    else if (e.key == 'ArrowDown') {
+        down = true;
+    }
+})
+setInterval(updatePosition, 1000/60);
